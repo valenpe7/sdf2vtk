@@ -12,6 +12,12 @@ class sdf2vtk:
     def read_sdf(self, filename):
         self.sdf_file = sdf.read(filename)
 
+    def list_variables(self):
+        if self.sdf_file is None:
+            return
+        for variable in self.sdf_file.__dict__:
+            print(variable)
+
     def create_vtk_field_grid(self, dimension, norm=1.0):
         if dimension is 1:
             sdf_grid_x = self.sdf_file.Grid_Grid.data[0] / norm
