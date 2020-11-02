@@ -10,8 +10,8 @@ sdf2vtk is a python library that allows you to easily convert variables from SDF
 sdf2vtk requires [sdf](https://github.com/keithbennett/SDF_utilities), [vtk](https://github.com/Kitware/VTK), and [numpy](https://github.com/numpy/numpy).</br>
 If these dependencies are satisfied, one can install sdf2vtk using pip:
 ```
-cd sdf2vtk
-pip install .
+$> cd sdf2vtk
+$> pip install .
 ```
 ### Usage
 
