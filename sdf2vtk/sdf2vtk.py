@@ -132,7 +132,7 @@ class sdf2vtk:
             sdf_variable = "Particles_P" + component + "_subset_" + subset + "_" + species
         else:
             sdf_variable = "Particles_P" + component + "_" + species
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_varibale].data / norm
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data / norm
         if single:
             vtk_variable = vtk.vtkSOADataArrayTemplate['float32']()
         else:
