@@ -68,7 +68,7 @@ class sdf2vtk:
         self.vtk_field_grid.SetOrigin(sdf_grid_x[0], sdf_grid_y[0], sdf_grid_z[0])
         self.vtk_field_grid.SetSpacing(sdf_grid_x[1] - sdf_grid_x[0], sdf_grid_y[1] - sdf_grid_y[0], sdf_grid_z[1] - sdf_grid_z[0])
 
-    def create_vtk_particle_grid(self, dimension, species, subset=None, norm=1.0):
+    def create_vtk_particle_grid(self, dimension, species, subset=None, norm=1.0, single=False):
         if dimension is 1:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
@@ -98,7 +98,10 @@ class sdf2vtk:
                 self.sdf_particle_z = self.sdf_file.__dict__["Grid_Particles_" + species].data[2] / norm
         else:
             raise ValueError("Dimension has to be 1, 2, or 3")
-        vtk_particle_coords = vtk.vtkSOADataArrayTemplate['float32']()
+        if single:
+            vtk_particle_coords = vtk.vtkSOADataArrayTemplate['float32']()
+        else:
+            vtk_particle_coords = vtk.vtkSOADataArrayTemplate['float64']()
         vtk_particle_coords.SetNumberOfComponents(3)
         vtk_particle_coords.SetNumberOfTuples(self.sdf_particle_x.size)
         vtk_particle_coords.SetArray(0, self.sdf_particle_x, self.sdf_particle_x.size, False, True)
