@@ -72,21 +72,25 @@ class sdf2vtk:
         if dimension is 1:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
+            else:
+                self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_" + species].data[0] / norm
+            if single:
                 self.sdf_particle_y = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
                 self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
             else:
-                self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_" + species].data[0] / norm
-                self.sdf_particle_y = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
-                self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
+                self.sdf_particle_y = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float64)
+                self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float64)
         elif dimension is 2:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
                 self.sdf_particle_y = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[1] / norm
-                self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
             else:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_" + species].data[0] / norm
                 self.sdf_particle_y = self.sdf_file.__dict__["Grid_Particles_" + species].data[1] / norm
+            if single:
                 self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
+            else:
+                self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float64)
         elif dimension is 3:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
