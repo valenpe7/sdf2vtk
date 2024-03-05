@@ -2,12 +2,16 @@ import sdf
 import vtk
 import numpy
 
+def xstr(s, prep=""):
+        return "" if s is None else prep + s
+
 class sdf2vtk:
 
-    def __init__(self):
+    def __init__(self, max_string_length=128):
         self.sdf_file = None
         self.vtk_field_grid = None
         self.vtk_particle_grid = None
+        self.max_string_length = max_string_length
 
     def read_sdf(self, filename):
         self.sdf_file = sdf.read(filename)
@@ -103,9 +107,9 @@ class sdf2vtk:
         else:
             raise ValueError("Dimension has to be 1, 2, or 3")
         if single:
-            vtk_particle_coords = vtk.vtkSOADataArrayTemplate['float32']()
+            vtk_particle_coords = vtk.vtkSOADataArrayTemplate["float32"]()
         else:
-            vtk_particle_coords = vtk.vtkSOADataArrayTemplate['float64']()
+            vtk_particle_coords = vtk.vtkSOADataArrayTemplate["float64"]()
         vtk_particle_coords.SetNumberOfComponents(3)
         vtk_particle_coords.SetNumberOfTuples(self.sdf_particle_x.size)
         vtk_particle_coords.SetArray(0, self.sdf_particle_x, self.sdf_particle_x.size, False, True)
@@ -135,118 +139,100 @@ class sdf2vtk:
     def add_particle_momentum_to_vtk(self, species, component, subset=None, norm=1.0, single=False):
         if self.vtk_particle_grid is None:
             raise TypeError("No grid to attach data to")
-        if subset is not None:
-            sdf_variable = "Particles_P" + component + "_subset_" + subset + "_" + species
-        else:
-            sdf_variable = "Particles_P" + component + "_" + species
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data / norm
+        sdf_variable = "Particles_P" + component + xstr(subset, "_subset_") + xstr(species, "_")
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data / norm
         if single:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float32']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
         else:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float64']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float64"]()
         vtk_variable.SetName(sdf_variable)
         vtk_variable.SetNumberOfComponents(1)
         vtk_variable.SetNumberOfTuples(self.vtk_particle_grid.GetNumberOfPoints())
-        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order='F'), vars(self)[sdf_variable].size, False, True)
+        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order="F"), vars(self)[sdf_variable].size, False, True)
         self.vtk_particle_grid.GetPointData().AddArray(vtk_variable)
 
     def add_particle_weight_to_vtk(self, species, subset=None, single=False):
         if self.vtk_particle_grid is None:
             raise TypeError("No grid to attach data to")
-        if subset is not None:
-            sdf_variable = "Particles_Weight_subset_" + subset + "_" + species
-        else:
-            sdf_variable = "Particles_Weight_" + species
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data
+        sdf_variable = "Particles_Weight" + xstr(subset, "_subset_") + xstr(species, "_")
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data
         if single:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float32']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
         else:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float64']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float64"]()
         vtk_variable.SetName(sdf_variable)
         vtk_variable.SetNumberOfComponents(1)
         vtk_variable.SetNumberOfTuples(self.vtk_particle_grid.GetNumberOfPoints())
-        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order='F'), vars(self)[sdf_variable].size, False, True)
+        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order="F"), vars(self)[sdf_variable].size, False, True)
         self.vtk_particle_grid.GetPointData().AddArray(vtk_variable)
 
     def add_particle_id_to_vtk(self, species, subset=None, single=False):
         if self.vtk_particle_grid is None:
             raise TypeError("No grid to attach data to")
-        if subset is not None:
-            sdf_variable = "Particles_ID_subset_" + subset + "_" + species
-        else:
-            sdf_variable = "Particles_ID_" + species
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data
+        sdf_variable = "Particles_ID" + xstr(subset, "_subset_") + xstr(species, "_")
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data
         if single:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['uint32']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["int32"]()
         else:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['uint64']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["l"]()
         vtk_variable.SetName(sdf_variable)
         vtk_variable.SetNumberOfComponents(1)
         vtk_variable.SetNumberOfTuples(self.vtk_particle_grid.GetNumberOfPoints())
-        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order='F'), vars(self)[sdf_variable].size, False, True)
+        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order="F"), vars(self)[sdf_variable].size, False, True)
         self.vtk_particle_grid.GetPointData().AddArray(vtk_variable)
 
-    def add_particle_number_density_to_vtk(self, species, subset=None, reduced=None, norm=1.0, single=False):
+    def add_particle_number_density_to_vtk(self, species, subset=None, reduced=False, norm=1.0, single=False):
         if self.vtk_field_grid is None:
             raise TypeError("No grid to attach data to")
-        if subset is not None:
-            if reduced:
-                sdf_variable = "Derived_Number_Density_subset_" + subset + "_" + species + "_Reduced_" + subset
-            else:
-                sdf_variable = "Derived_Number_Density_subset_" + subset + "_" + species
+        if reduced:
+            sdf_variable = "Derived_Number_Density" + xstr(subset, "_Subset_") + xstr(species, "_") + "_Reduced"
         else:
-            sdf_variable = "Derived_Number_Density_" + species
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data / norm
+            sdf_variable = "Derived_Number_Density" + xstr(subset, "_Subset_") + xstr(species, "_")
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data / norm
         if single:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float32']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
         else:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float64']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float64"]()
         vtk_variable.SetName(sdf_variable)
         vtk_variable.SetNumberOfComponents(1)
         vtk_variable.SetNumberOfTuples(self.vtk_field_grid.GetNumberOfCells())
-        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order='F'), vars(self)[sdf_variable].size, False, True)
+        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order="F"), vars(self)[sdf_variable].size, False, True)
         self.vtk_field_grid.GetCellData().AddArray(vtk_variable)
 
     def add_electric_field_to_vtk(self, component=None, subset=None, reduced=False, norm=1.0, single=False):
         if self.vtk_field_grid is None:
             raise TypeError("No grid to attach data to")
-        if subset is not None:
-            if reduced:
-                sdf_variable = "Electric_Field_E" + component + "_Reduced_" + subset
-            else:
-                sdf_variable = "Electric_Field_E" + component + "_Core_" + subset
+        if reduced:
+            sdf_variable = "Electric_Field_E" + component + "_Reduced" + xstr(subset, "_")
         else:
-            sdf_variable = "Electric_Field_E" + component
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data / norm
+            sdf_variable = "Electric_Field_E" + component + "_Core" + xstr(subset, "_")
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data / norm
         if single:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float32']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
         else:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float64']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float64"]()
         vtk_variable.SetName(sdf_variable)
         vtk_variable.SetNumberOfComponents(1)
         vtk_variable.SetNumberOfTuples(self.vtk_field_grid.GetNumberOfCells())
-        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order='F'), vars(self)[sdf_variable].size, False, True)
+        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order="F"), vars(self)[sdf_variable].size, False, True)
         self.vtk_field_grid.GetCellData().AddArray(vtk_variable)
 
     def add_magnetic_field_to_vtk(self, component=None, subset=None, reduced=False, norm=1.0, single=False):
         if self.vtk_field_grid is None:
             raise TypeError("No grid to attach data to")
-        if subset is not None:
-            if reduced:
-                sdf_variable = "Magnetic_Field_B" + component + "_Reduced_" + subset
-            else:
-                sdf_variable = "Magnetic_Field_B" + component + "_Core_" + subset
+        if reduced:
+            sdf_variable = "Magnetic_Field_B" + component + "_Reduced" + xstr(subset, "_")
         else:
-            sdf_variable = "Magnetic_Field_B" + component
-        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable].data / norm
+            sdf_variable = "Magnetic_Field_B" + component + "_Core" + xstr(subset, "_")
+        vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data / norm
         if single:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float32']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
         else:
-            vtk_variable = vtk.vtkSOADataArrayTemplate['float64']()
+            vtk_variable = vtk.vtkSOADataArrayTemplate["float64"]()
         vtk_variable.SetName(sdf_variable)
         vtk_variable.SetNumberOfComponents(1)
         vtk_variable.SetNumberOfTuples(self.vtk_field_grid.GetNumberOfCells())
-        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order='F'), vars(self)[sdf_variable].size, False, True)
+        vtk_variable.SetArray(0, numpy.ravel(a=vars(self)[sdf_variable], order="F"), vars(self)[sdf_variable].size, False, True)
         self.vtk_field_grid.GetCellData().AddArray(vtk_variable)
 
     def write_vtk_field_grid(self, output):
