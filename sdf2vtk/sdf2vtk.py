@@ -23,7 +23,7 @@ class sdf2vtk:
             print(variable)
 
     def create_vtk_field_grid(self, dimension, subset=None, reduced=False, norm=1.0):
-        if dimension is 1:
+        if dimension == 1:
             if subset is not None:
                 if reduced:
                     sdf_grid_x = self.sdf_file.__dict__["Grid_Reduced_" + subset].data[0] / norm
@@ -37,7 +37,7 @@ class sdf2vtk:
                 sdf_grid_x = self.sdf_file.Grid_Grid.data[0] / norm
                 sdf_grid_y = numpy.zeros(2)
                 sdf_grid_z = numpy.zeros(2)
-        elif dimension is 2:
+        elif dimension == 2:
             if subset is not None:
                 if reduced:
                     sdf_grid_x = self.sdf_file.__dict__["Grid_Reduced_" + subset].data[0] / norm
@@ -51,7 +51,7 @@ class sdf2vtk:
                 sdf_grid_x = self.sdf_file.Grid_Grid.data[0] / norm
                 sdf_grid_y = self.sdf_file.Grid_Grid.data[1] / norm
                 sdf_grid_z = numpy.zeros(2)
-        elif dimension is 3:
+        elif dimension == 3:
             if subset is not None:
                 if reduced:
                     sdf_grid_x = self.sdf_file.__dict__["Grid_Reduced_" + subset].data[0] / norm
@@ -73,7 +73,7 @@ class sdf2vtk:
         self.vtk_field_grid.SetSpacing(sdf_grid_x[1] - sdf_grid_x[0], sdf_grid_y[1] - sdf_grid_y[0], sdf_grid_z[1] - sdf_grid_z[0])
 
     def create_vtk_particle_grid(self, dimension, species, subset=None, norm=1.0, single=False):
-        if dimension is 1:
+        if dimension == 1:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
             else:
@@ -84,7 +84,7 @@ class sdf2vtk:
             else:
                 self.sdf_particle_y = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float64)
                 self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float64)
-        elif dimension is 2:
+        elif dimension == 2:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
                 self.sdf_particle_y = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[1] / norm
@@ -95,7 +95,7 @@ class sdf2vtk:
                 self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float32)
             else:
                 self.sdf_particle_z = numpy.zeros(self.sdf_particle_x.size, dtype=numpy.float64)
-        elif dimension is 3:
+        elif dimension == 3:
             if subset is not None:
                 self.sdf_particle_x = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[0] / norm
                 self.sdf_particle_y = self.sdf_file.__dict__["Grid_Particles_subset_" + subset + "_" + species].data[1] / norm
@@ -205,7 +205,7 @@ class sdf2vtk:
         if reduced:
             sdf_variable = "Electric_Field_E" + component + "_Reduced" + xstr(subset, "_")
         else:
-            sdf_variable = "Electric_Field_E" + component + "_Core" + xstr(subset, "_")
+            sdf_variable = "Electric_Field_E" + component + xstr(subset, "_")
         vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data / norm
         if single:
             vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
@@ -223,7 +223,7 @@ class sdf2vtk:
         if reduced:
             sdf_variable = "Magnetic_Field_B" + component + "_Reduced" + xstr(subset, "_")
         else:
-            sdf_variable = "Magnetic_Field_B" + component + "_Core" + xstr(subset, "_")
+            sdf_variable = "Magnetic_Field_B" + component + xstr(subset, "_")
         vars(self)[sdf_variable] = self.sdf_file.__dict__[sdf_variable[:self.max_string_length]].data / norm
         if single:
             vtk_variable = vtk.vtkSOADataArrayTemplate["float32"]()
